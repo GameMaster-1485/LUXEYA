@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LUXEYA — Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition:0.3s;}
+body{background:#fafafa;color:#111;}
+body.dark{background:#111;color:#eee;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:#111;color:#fff;position:sticky;top:0;z-index:1000;}
+body.dark nav{background:#222;}
+nav h1{cursor:pointer;font-weight:700;letter-spacing:3px;font-size:24px;}
+nav ul{display:flex;gap:20px;list-style:none;align-items:center;}
+nav li{cursor:pointer;font-weight:500;}
+nav button{background:#ff3c78;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;}
+.admin-container{max-width:1000px;margin:30px auto;padding:20px;}
+body.dark .admin-container{color:#eee;}
+.card{background:#fff;padding:20px;margin-bottom:20px;border-radius:16px;box-shadow:0 5px 25px rgba(0,0,0,0.1);}
+body.dark .card{background:#222;}
+.card h2{margin-bottom:12px;}
+input,button{padding:10px;border-radius:8px;border:1px solid #ddd;}
+body.dark input{background:#333;border:1px solid #555;color:#eee;}
+button{cursor:pointer;}
+button.add-btn{background:#ff3c78;color:#fff;border:none;font-weight:600;margin-top:10px;}
+button.add-btn:hover{opacity:0.9;transform:translateY(-1px);}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:10px;text-align:left;border:1px solid #ddd;}
+th{background:#111;color:#fff;}
+body.dark th{background:#222;}
+body.dark td{color:#eee;}
+.actions button{margin-right:5px;padding:6px 10px;border-radius:6px;border:none;color:#fff;font-weight:600;}
+.actions .delete{background:#e74c3c;}
+.actions .confirm{background:#27ae60;}
+.actions button:hover{opacity:0.9;transform:translateY(-1px);}
+</style>
+</head>
+<body>
+<nav>
+  <h1 onclick="location.href='index.html'">LUXEYA</h1>
+  <ul>
+    <li onclick="location.href='index.html'">Home</li>
+    <li onclick="logout()">Logout</li>
+  </ul>
+  <button id="themeToggle">🌙</button>
+</nav>
+
+<div class="admin-container">
+
+<!-- Add Product -->
+<div class="card">
+  <h2>Add Product</h2>
+  <input id="pName" placeholder="Product Name">
+  <input type="number" id="pPrice" placeholder="Price">
+  <input type="file" id="pImg">
+  <button class="add-btn" onclick="addProduct()">Add Product</button>
+</div>
+
+<!-- Products Table -->
+<div class="card">
+  <h2>Products</h2>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Price</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="productsTable"></tbody>
+  </table>
+</div>
+
+<!-- Orders Table -->
+<div class="card">
+  <h2>Orders</h2>
+  <table>
+    <thead>
+      <tr><th>User</th><th>Phone</th><th>Place</th><th>Products</th><th>Total</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="ordersTable"></tbody>
+  </table>
+</div>
+
+</div>
+
+<script>
+/* Admin Authentication */
+let adminPass=prompt("Enter Admin Password:");
+if(adminPass!=='MBARKA1111'){alert("Wrong password");location.href='index.html';}
+
+/* Dark Mode */
+let darkMode=false;
+if(localStorage.getItem('theme')==='dark'){darkMode=true;document.body.classList.add('dark');}
+document.getElementById('themeToggle').onclick=()=>{
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  localStorage.setItem('theme',darkMode?'dark':'light');
+};
+
+/* Products */
+let products=JSON.parse(localStorage.getItem('products'))||[];
+function renderProducts(){
+  const table=document.getElementById('productsTable');
+  table.innerHTML='';
+  products.forEach(p=>{
+    table.innerHTML+=`<tr>
+      <td>${p.name}</td>
+      <td>$${p.price}</td>
+      <td class="actions">
+        <button class="delete" onclick="deleteProduct(${p.id})">Delete</button>
+      </td>
+    </tr>`;
+  });
+}
+function addProduct(){
+  const name=document.getElementById('pName').value.trim();
+  const price=parseFloat(document.getElementById('pPrice').value);
+  const file=document.getElementById('pImg').files[0];
+  if(!name||!price||!file){alert('All fields required');return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=e.target.result;
+    products.push({id:Date.now(),name,price,img});
+    localStorage.setItem('products',JSON.stringify(products));
+    renderProducts();
+    alert('Product added ✔');
+    document.getElementById('pName').value='';document.getElementById('pPrice').value='';document.getElementById('pImg').value='';
+  }
+  reader.readAsDataURL(file);
+}
+function deleteProduct(id){
+  products=products.filter(p=>p.id!==id);
+  localStorage.setItem('products',JSON.stringify(products));
+  renderProducts();
+}
+renderProducts();
+
+/* Orders */
+function renderOrders(){
+  const table=document.getElementById('ordersTable');
+  let orders=JSON.parse(localStorage.getItem('orders'))||[];
+  table.innerHTML='';
+  orders.forEach((o,i)=>{
+    table.innerHTML+=`<tr>
+      <td>${o.username}</td>
+      <td>${o.phone}</td>
+      <td>${o.place}</td>
+      <td>${o.userCart.map(p=>p.name).join(", ")}</td>
+      <td>$${o.total}</td>
+      <td class="actions">
+        <button class="confirm" onclick="confirmOrder(${i})">✔ Confirm</button>
+        <button class="delete" onclick="deleteOrder(${i})">✖ Delete</button>
+      </td>
+    </tr>`;
+  });
+}
+function confirmOrder(index){
+  alert('Order confirmed for '+JSON.parse(localStorage.getItem('orders'))[index].username);
+}
+function deleteOrder(index){
+  let orders=JSON.parse(localStorage.getItem('orders'))||[];
+  orders.splice(index,1);
+  localStorage.setItem('orders',JSON.stringify(orders));
+  renderOrders();
+}
+renderOrders();
+
+/* Logout */
+function logout(){location.href='index.html';}
+</script>
+</body>
+</html>
+
+

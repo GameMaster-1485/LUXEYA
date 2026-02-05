@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LUXEYA — Cart</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition:0.3s;}
+body{background:#fafafa;color:#111;}
+body.dark{background:#111;color:#eee;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:#111;color:#fff;position:sticky;top:0;z-index:1000;}
+body.dark nav{background:#222;}
+nav h1{cursor:pointer;font-weight:700;letter-spacing:3px;font-size:24px;}
+nav ul{display:flex;gap:20px;list-style:none;align-items:center;}
+nav li{cursor:pointer;font-weight:500;}
+nav button{background:#ff3c78;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;}
+.cart-box{max-width:600px;margin:20px auto;background:#fff;padding:20px;border-radius:16px;box-shadow:0 5px 25px rgba(0,0,0,0.1);}
+body.dark .cart-box{background:#222;color:#eee;}
+.cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.cart-item button{background:#ff3c78;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+.cart-item button:hover{opacity:0.9;transform:translateY(-1px);}
+button.checkout{width:100%;padding:14px;margin-top:12px;background:#ff3c78;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+button.checkout:hover{opacity:0.9;transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<nav>
+  <h1 onclick="location.href='index.html'">LUXEYA</h1>
+  <ul>
+    <li onclick="location.href='shop.html'">Shop</li>
+    <li onclick="logout()">Logout</li>
+  </ul>
+  <button id="themeToggle">🌙</button>
+</nav>
+
+<div class="cart-box">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<b>Total: $<span id="total">0</span></b>
+<button class="checkout" onclick="checkout()">Checkout</button>
+</div>
+
+<script>
+if(!localStorage.getItem('loggedUser')) location.href='login.html';
+let darkMode=false;
+if(localStorage.getItem('theme')==='dark'){darkMode=true;document.body.classList.add('dark');}
+document.getElementById('themeToggle').onclick=()=>{
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  localStorage.setItem('theme',darkMode?'dark':'light');
+};
+function logout(){localStorage.removeItem('loggedUser');location.href='login.html';}
+
+let cart=JSON.parse(localStorage.getItem('cart'))||[];
+let user=JSON.parse(localStorage.getItem('loggedUser'));
+
+function updateCart(){
+  const div=document.getElementById('cartItems');
+  div.innerHTML='';
+  let total=0;
+  cart.forEach((c,i)=>{
+    total+=c.price;
+    div.innerHTML+=`<div class="cart-item"><span>${c.name} - $${c.price}</span>
+    <button onclick="removeItem(${i})">X</button></div>`;
+  });
+  document.getElementById('total').innerText=total;
+}
+function removeItem(i){cart.splice(i,1);localStorage.setItem('cart',JSON.stringify(cart));updateCart();}
+updateCart();
+
+function checkout(){
+  if(cart.length===0){alert('Cart empty');return;}
+  const order={username:user.username,phone:user.phone,place:user.place,userCart:cart,total:cart.reduce((s,p)=>s+p.price,0)};
+  let orders=JSON.parse(localStorage.getItem('orders'))||[];
+  orders.push(order);
+  localStorage.setItem('orders',JSON.stringify(orders));
+  cart=[];localStorage.setItem('cart',JSON.stringify(cart));
+  alert('Order sent ✔');
+  location.href='index.html';
+}
+</script>
+</body>
+</html>
+
+
+

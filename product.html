@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LUXEYA — Product</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition:0.3s;}
+body{background:#fafafa;color:#111;}
+body.dark{background:#111;color:#eee;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:#111;color:#fff;position:sticky;top:0;z-index:1000;}
+body.dark nav{background:#222;}
+nav h1{cursor:pointer;font-weight:700;letter-spacing:3px;font-size:24px;}
+nav ul{display:flex;gap:20px;list-style:none;align-items:center;}
+nav li{cursor:pointer;font-weight:500;}
+nav button{background:#ff3c78;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;}
+.product-page{max-width:600px;margin:20px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 5px 25px rgba(0,0,0,0.1);}
+body.dark .product-page{background:#222;color:#eee;}
+.product-page img{width:100%;height:400px;object-fit:cover;}
+.details{padding:16px;}
+.details h2{font-size:24px;margin-bottom:10px;}
+.details h3{color:#444;margin-bottom:10px;}
+body.dark .details h3{color:#ff3c78;}
+.details p{color:#666;margin-bottom:16px;}
+body.dark .details p{color:#ccc;}
+button{width:100%;padding:14px;background:#ff3c78;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+button:hover{opacity:0.9;transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<nav>
+  <h1 onclick="location.href='index.html'">LUXEYA</h1>
+  <ul>
+    <li onclick="location.href='shop.html'">Shop</li>
+    <li onclick="location.href='cart.html'">🛒 Cart</li>
+    <li onclick="location.href='login.html'">Logout</li>
+  </ul>
+  <button id="themeToggle">🌙</button>
+</nav>
+
+<div class="product-page">
+  <img id="ppImg">
+  <div class="details">
+    <h2 id="ppName"></h2>
+    <h3 id="ppPrice"></h3>
+    <p>Premium streetwear inspired by modern fashion. Unique designs for your style.</p>
+    <button onclick="addToCart()">Add to Cart</button>
+  </div>
+</div>
+
+<script>
+if(!localStorage.getItem('loggedUser')) location.href='login.html';
+let darkMode=false;
+if(localStorage.getItem('theme')==='dark'){darkMode=true;document.body.classList.add('dark');}
+document.getElementById('themeToggle').onclick=()=>{
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  localStorage.setItem('theme',darkMode?'dark':'light');
+};
+
+let products=JSON.parse(localStorage.getItem('products'))||[];
+let cart=JSON.parse(localStorage.getItem('cart'))||[];
+let productId=localStorage.getItem('currentProduct');
+let current=products.find(p=>p.id==productId);
+
+document.getElementById('ppImg').src=current.img;
+document.getElementById('ppName').innerText=current.name;
+document.getElementById('ppPrice').innerText='$'+current.price;
+
+function addToCart(){
+  cart.push(current);
+  localStorage.setItem('cart',JSON.stringify(cart));
+  alert('Added to cart ✔');
+  location.href='cart.html';
+}
+</script>
+</body>
+</html>
+
+
+
+
+

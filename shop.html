@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LUXEYA — Shop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;transition:0.3s;}
+body{background:#fafafa;color:#111;}
+body.dark{background:#111;color:#eee;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:#111;color:#fff;position:sticky;top:0;z-index:1000;box-shadow:0 3px 15px rgba(0,0,0,0.2);}
+body.dark nav{background:#222;}
+nav h1{cursor:pointer;font-weight:700;letter-spacing:3px;font-size:24px;}
+nav ul{display:flex;gap:20px;list-style:none;align-items:center;}
+nav li{cursor:pointer;font-weight:500;}
+nav li:hover{color:#ff3c78;}
+nav button{background:#ff3c78;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;}
+
+/* GRID PRODUCTS */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,250px);
+  justify-content:center;
+  gap:30px;
+  padding:30px;
+}
+.product{
+  width:250px;
+  height:250px;
+  background:#fff;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 5px 25px rgba(0,0,0,0.1);
+  transition:0.5s;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  border:1px solid #eee;
+}
+body.dark .product{background:#222;border-color:#444;}
+.product img{
+  width:200px;
+  height:200px;
+  object-fit:cover;
+  border-radius:12px;
+  transition:transform 0.5s,filter 0.5s;
+}
+.product:hover img{transform:scale(1.05);filter:brightness(1.1);}
+.product-info{margin-top:8px;text-align:center;}
+.product-info p{font-weight:500;font-size:16px;color:#222;}
+body.dark .product-info p{color:#eee;}
+.product-info b{color:#111;font-size:16px;font-weight:600;}
+body.dark .product-info b{color:#fff;}
+</style>
+</head>
+<body>
+<nav>
+  <h1 onclick="location.href='index.html'">LUXEYA</h1>
+  <ul>
+    <li onclick="location.href='index.html'">Home</li>
+    <li onclick="location.href='shop.html'">Shop</li>
+    <li onclick="location.href='cart.html'">🛒 Cart</li>
+    <li onclick="location.href='admin.html'">Admin</li>
+    <li onclick="logout()">Logout</li>
+  </ul>
+  <button id="themeToggle">🌙</button>
+</nav>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const themeBtn=document.getElementById('themeToggle');
+let darkMode=false;
+if(localStorage.getItem('theme')==='dark'){darkMode=true;document.body.classList.add('dark');}
+themeBtn.innerText=darkMode?'☀️':'🌙';
+themeBtn.onclick=()=>{
+  darkMode=!darkMode;
+  document.body.classList.toggle('dark',darkMode);
+  localStorage.setItem('theme',darkMode?'dark':'light');
+  themeBtn.innerText=darkMode?'☀️':'🌙';
+}
+if(!localStorage.getItem('loggedUser')) location.href='login.html';
+
+// المنتجات (يمكن تغييرها في admin)
+let products=JSON.parse(localStorage.getItem('products'))||[
+  {id:1,name:"Black Jacket",price:80,img:"images/black-jacket.jpg"},
+  {id:2,name:"White Hoodie",price:60,img:"images/white-hoodie.jpg"},
+  {id:3,name:"Blue Jeans",price:50,img:"images/blue-jeans.jpg"}
+];
+
+function renderShop(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  products.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='product';
+    div.innerHTML=`<img src="${p.img}"><div class="product-info"><p>${p.name}</p><b>$${p.price}</b></div>`;
+    div.onclick=()=>{localStorage.setItem('currentProduct',p.id);location.href='product.html';};
+    grid.appendChild(div);
+  });
+}
+renderShop();
+
+function logout(){localStorage.removeItem('loggedUser');location.href='login.html';}
+</script>
+</body>
+</html>
+
